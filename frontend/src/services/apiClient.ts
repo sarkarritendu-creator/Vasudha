@@ -1,6 +1,9 @@
 /**
- * Shared API client — base URL from env for demos across networks/hotspots.
- * Set VITE_API_BASE in frontend/.env e.g. http://192.168.1.10:8000/api/v1
+ * Shared API client — base URL from env for demos and production.
+ *
+ * Local:   leave unset → http://127.0.0.1:8000/api/v1
+ * Deploy:  set VITE_API_BASE at Vercel build time to your Render URL, e.g.
+ *          https://vasudha-backend.onrender.com/api/v1
  */
 const BASE_URL =
   (typeof import.meta !== "undefined" && (import.meta as any).env?.VITE_API_BASE) ||
@@ -40,4 +43,14 @@ export async function apiFetch<T = any>(path: string, options: RequestInit = {})
 
 export function getApiBase() {
   return BASE_URL;
+}
+
+/** Root of the API host (without /api/v1) — used by keepalive. */
+export function getApiOrigin(): string {
+  try {
+    const u = new URL(BASE_URL);
+    return u.origin;
+  } catch {
+    return "http://127.0.0.1:8000";
+  }
 }

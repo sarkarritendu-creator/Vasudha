@@ -3,12 +3,13 @@
  * The Shell is the persistent frame; modules are lazy-loaded routes inside it.
  */
 
-import React, { lazy, Suspense } from "react";
+import React, { lazy, Suspense, useEffect } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import { BuildingProvider } from "./contexts/BuildingContext";
 import { Shell } from "./modules/shell/Shell";
 import { LoginPage } from "./pages/LoginPage";
+import { startKeepAlive, stopKeepAlive } from "./services/keepAlive";
 
 // Lazy-load each module so the initial shell stays light
 const OccupancyPage = lazy(() => import("./modules/occupancy_hvac/OccupancyPage"));
@@ -25,6 +26,12 @@ const PageLoader = () => (
 );
 
 export default function App() {
+  // Keep Render free-tier backend awake while this tab is open
+  useEffect(() => {
+    startKeepAlive();
+    return () => stopKeepAlive();
+  }, []);
+
   return (
     <AuthProvider>
       <BuildingProvider>
